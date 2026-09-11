@@ -1,0 +1,2 @@
+:quarkus-version: 3.21.0
+:extension-status: stable

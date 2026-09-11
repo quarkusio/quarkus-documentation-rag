@@ -1,0 +1,6 @@
+INCLUDED_SNIPPET_MARKER describes how to configure the connection pool.
+
+[source,properties]
+----
+quarkus.datasource.jdbc.max-size=16
+----

@@ -44,10 +44,24 @@ Process specific guides for a single extension. Typically configured in a parent
 
 The plugin defaults `extensionName` to `${project.artifactId}` and silently skips modules where the property is not set.
 
+### Build-supplied attributes
+
+Guides whose include targets are built from attributes need those attributes passed to the parser:
+
+```xml
+<configuration>
+    <attributes>
+        <includes>${project.basedir}/docs/src/main/asciidoc/_includes</includes>
+    </attributes>
+</configuration>
+```
+
+Without this, `include::{includes}/attributes.adoc[]` cannot be resolved and its content is missing from the embeddings.
+
 ## How it works
 
-1. AsciiDoc files are parsed using AsciidoctorJ's AST (no external service required)
-2. Documents are split into chunks at section boundaries using a semantic splitter
+1. AsciiDoc files are parsed using AsciidoctorJ's AST (no external service required). `include::` directives are resolved, attribute references are substituted where Asciidoctor would substitute them, and inline macros are reduced to their readable text
+2. Documents are split into chunks at section boundaries using a semantic splitter. The preamble, between the document title and the first section heading, becomes a chunk of its own
 3. Each chunk is embedded using the BGE Small EN v1.5 quantized ONNX model (384 dimensions)
 4. The result is written as idempotent SQL: `DELETE` by source name + `INSERT` with vector embeddings and JSONB metadata
 
