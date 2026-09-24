@@ -44,11 +44,20 @@ public class RagPipeline implements AutoCloseable {
 
     public RagPipeline(String extensionName, String version, String guideBaseUrl, String guideUrl,
             int maxChunkSize) {
+        this(extensionName, version, guideBaseUrl, guideUrl, maxChunkSize, Map.of());
+    }
+
+    /**
+     * @param attributes extra AsciiDoc attributes for the parser, for guides whose
+     *        include targets are built from build-supplied attributes
+     */
+    public RagPipeline(String extensionName, String version, String guideBaseUrl, String guideUrl,
+            int maxChunkSize, Map<String, Object> attributes) {
         this.extensionName = extensionName;
         this.version = version;
         this.guideBaseUrl = guideBaseUrl;
         this.guideUrl = guideUrl;
-        this.processor = new AsciiDocProcessor();
+        this.processor = new AsciiDocProcessor(attributes);
         this.splitter = new SemanticSplitter(maxChunkSize);
         this.embeddingGenerator = new EmbeddingGenerator();
         this.sqlWriter = new SqlFragmentWriter();

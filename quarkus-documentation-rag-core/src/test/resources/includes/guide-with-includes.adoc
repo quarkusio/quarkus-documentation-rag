@@ -1,0 +1,43 @@
+= Datasource Guide
+include::_attributes.adoc[]
+:categories: data
+:extensions: io.quarkus:quarkus-agroal
+
+PREAMBLE_MARKER this guide covers datasources on Quarkus {quarkus-version}.
+
+== Configuration
+
+The extension is {extension-status} and is described in xref:rest.adoc[the REST guide].
+
+include::_snippet.adoc[]
+
+include::does-not-exist.adoc[]
+
+|===
+| Property | Default
+
+| quarkus.datasource.db-kind
+| none
+
+| quarkus.datasource.username
+|
+|===
+
+== Inline Macros
+
+Press kbd:[Ctrl+C] then click btn:[Save] icon:check[] to finish.
+See link:https://quarkus.io/guides[the guides] and <<configuration,the section above>>.
+
+== Verbatim Blocks
+
+Attributes are left alone unless the author opts in:
+
+[source,xml]
+----
+<version>{quarkus-version}</version>
+----
+
+[source,xml,subs=attributes+]
+----
+<version>{quarkus-version}</version>
+----

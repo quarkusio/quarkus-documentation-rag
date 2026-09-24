@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -87,6 +89,14 @@ public class GenerateRagMojo extends AbstractMojo {
     @Parameter(defaultValue = "1000")
     private int maxChunkSize;
 
+    /**
+     * Extra AsciiDoc attributes passed to the parser. Needed by guides whose include
+     * targets are built from build-supplied attributes, e.g.
+     * {@code <includes>path/to/_includes</includes>} for {@code include::{includes}/attributes.adoc[]}.
+     */
+    @Parameter
+    private Map<String, String> attributes;
+
     @Parameter(property = "quarkus-rag.skip", defaultValue = "false")
     private boolean skip;
 
@@ -121,7 +131,7 @@ public class GenerateRagMojo extends AbstractMojo {
 
         try (RagPipeline pipeline = new RagPipeline(
                 hasDirectory ? null : resolvedExtensionName,
-                version, guideBaseUrl, guideUrl, maxChunkSize)) {
+                version, guideBaseUrl, guideUrl, maxChunkSize, resolveAttributes())) {
             if (hasDirectory) {
                 getLog().info("Scanning directory " + guidesDirectory + " for guides (source from metadata)");
                 pipeline.processDirectory(guidesDirectory.toPath(), outputFile.toPath());
@@ -146,6 +156,13 @@ public class GenerateRagMojo extends AbstractMojo {
         }
 
         getLog().info("RAG SQL written to " + outputFile);
+    }
+
+    private Map<String, Object> resolveAttributes() {
+        if (attributes == null || attributes.isEmpty()) {
+            return Map.of();
+        }
+        return new LinkedHashMap<>(attributes);
     }
 
     private List<File> resolveGuides() {

@@ -33,6 +33,13 @@ class AsciiDocProcessorTest {
     }
 
     @Test
+    void capturesThePreambleBeforeTheFirstSection() {
+        ParsedDocument doc = processor.parse(TEST_GUIDE);
+
+        assertThat(doc.sections().get(0).content()).isEqualTo("This is the preamble paragraph.");
+    }
+
+    @Test
     void extractsTopLevelSections() {
         ParsedDocument doc = processor.parse(TEST_GUIDE);
 

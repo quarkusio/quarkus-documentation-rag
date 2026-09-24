@@ -81,4 +81,42 @@ class SemanticSplitterTest {
         List<Chunk> chunks = splitter.split(List.of());
         assertThat(chunks).isEmpty();
     }
+
+    @Test
+    void splitsOversizedTablesByRowsAndRepeatsTheHeader() {
+        SemanticSplitter splitter = new SemanticSplitter(300);
+        StringBuilder table = new StringBuilder("| Property | Default |\n| --- | --- |\n");
+        for (int i = 0; i < 40; i++) {
+            table.append("| quarkus.example.property-").append(i).append(" | value |\n");
+        }
+
+        List<Chunk> chunks = splitter.split(List.of(
+                new DocumentSection(2, "Config", table.toString().trim(), "Config")));
+
+        assertThat(chunks).hasSizeGreaterThan(1);
+        assertThat(chunks).allSatisfy(chunk -> {
+            assertThat(chunk.text().length()).isLessThanOrEqualTo(300);
+            assertThat(chunk.text()).startsWith("| Property | Default |\n| --- | --- |\n| quarkus.example.property-");
+        });
+        assertThat(chunks.get(chunks.size() - 1).text()).contains("quarkus.example.property-39");
+    }
+
+    @Test
+    void splitsOversizedCodeBlocksAndFencesEachPart() {
+        SemanticSplitter splitter = new SemanticSplitter(300);
+        StringBuilder code = new StringBuilder("```java\n");
+        for (int i = 0; i < 40; i++) {
+            code.append("int value").append(i).append(" = ").append(i).append(";\n");
+        }
+        code.append("```");
+
+        List<Chunk> chunks = splitter.split(List.of(
+                new DocumentSection(2, "Code", code.toString(), "Code")));
+
+        assertThat(chunks).hasSizeGreaterThan(1);
+        assertThat(chunks).allSatisfy(chunk -> {
+            assertThat(chunk.text().length()).isLessThanOrEqualTo(300);
+            assertThat(chunk.text()).startsWith("```java\n").endsWith("\n```");
+        });
+    }
 }
