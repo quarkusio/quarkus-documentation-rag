@@ -125,6 +125,13 @@ class AsciiDocExtractionFidelityTest {
     }
 
     @Test
+    void stripsInlineAnchorsRoleMarksAndPassthroughs() {
+        assertThat(AsciiDocProcessor.stripInlineMacros(
+                "[[prop-id]] [.property-path]##`+++quarkus.foo+++`## and pass:[<b>] ##loud##"))
+                .isEqualTo(" `quarkus.foo` and <b> loud");
+    }
+
+    @Test
     void fallsBackToTheTargetWhenACrossReferenceHasNoText() {
         assertThat(AsciiDocProcessor.stripInlineMacros("See <<json-config>> and icon:warning[] xref:rest.adoc[REST]."))
                 .isEqualTo("See json-config and REST.");

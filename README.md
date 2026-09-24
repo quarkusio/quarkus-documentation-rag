@@ -60,8 +60,8 @@ Without this, `include::{includes}/attributes.adoc[]` cannot be resolved and its
 
 ## How it works
 
-1. AsciiDoc files are parsed using AsciidoctorJ's AST (no external service required). `include::` directives are resolved, attribute references are substituted where Asciidoctor would substitute them, and inline macros are reduced to their readable text
-2. Documents are split into chunks at section boundaries using a semantic splitter. The preamble, between the document title and the first section heading, becomes a chunk of its own
+1. AsciiDoc files are parsed using AsciidoctorJ's AST (no external service required). `include::` directives are resolved, attribute references are substituted where Asciidoctor would substitute them, using the value in effect at that point of the document, and inline macros and markup are reduced to their readable text. Tables become pipe tables, including AsciiDoc-style (`a|`) cells such as those in generated config references
+2. Documents are split into chunks at section boundaries using a semantic splitter. The preamble, between the document title and the first section heading, becomes a chunk of its own. A table or code block too large for one chunk is split by rows or lines, repeating the table header or code fence in each part
 3. Each chunk is embedded using the BGE Small EN v1.5 quantized ONNX model (384 dimensions)
 4. The result is written as idempotent SQL: `DELETE` by source name + `INSERT` with vector embeddings and JSONB metadata
 

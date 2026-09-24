@@ -1,0 +1,9 @@
+ifndef::provider-artifact[]
+:provider-artifact: quarkus-default
+endif::[]
+
+[source,xml,subs=attributes+]
+----
+<artifactId>{provider-artifact}</artifactId>
+<version>{quarkus-version}</version>
+----

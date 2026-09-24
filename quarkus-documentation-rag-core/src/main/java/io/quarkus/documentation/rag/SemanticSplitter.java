@@ -2,6 +2,7 @@ package io.quarkus.documentation.rag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import io.quarkus.documentation.rag.AsciiDocProcessor.DocumentSection;
 
@@ -13,6 +14,8 @@ import io.quarkus.documentation.rag.AsciiDocProcessor.DocumentSection;
 public class SemanticSplitter {
 
     private static final int MIN_SECTION_SIZE = 300;
+
+    private static final Pattern TABLE_SEPARATOR = Pattern.compile("^\\|( --- \\|)+$");
 
     private final int maxChunkSize;
 
@@ -107,6 +110,10 @@ public class SemanticSplitter {
                 parts.add(current.toString().trim());
                 current = new StringBuilder();
             }
+            if (paragraph.length() > maxChunkSize) {
+                parts.addAll(splitOversizedParagraph(paragraph));
+                continue;
+            }
             if (!current.isEmpty()) {
                 current.append("\n\n");
             }
@@ -117,6 +124,47 @@ public class SemanticSplitter {
             parts.add(current.toString().trim());
         }
 
+        return parts;
+    }
+
+    /**
+     * Splits a single block that is larger than a chunk on its own, which blank-line
+     * splitting cannot do. Tables, such as config references, are split by rows with the
+     * header repeated so every part is still a readable table. Code blocks are split by lines
+     * and each part is fenced again. Anything else is split by lines. A single line longer
+     * than a chunk is kept whole rather than cut mid-line.
+     */
+    private List<String> splitOversizedParagraph(String paragraph) {
+        List<String> lines = List.of(paragraph.split("\n"));
+        String prefix = "";
+        String suffix = "";
+        List<String> body = lines;
+
+        if (lines.size() > 2 && lines.get(0).startsWith("```") && lines.get(lines.size() - 1).equals("```")) {
+            prefix = lines.get(0) + "\n";
+            suffix = "\n```";
+            body = lines.subList(1, lines.size() - 1);
+        } else if (lines.size() > 2 && lines.get(0).startsWith("|") && TABLE_SEPARATOR.matcher(lines.get(1)).matches()) {
+            prefix = lines.get(0) + "\n" + lines.get(1) + "\n";
+            body = lines.subList(2, lines.size());
+        }
+
+        List<String> parts = new ArrayList<>();
+        int budget = maxChunkSize - prefix.length() - suffix.length();
+        StringBuilder current = new StringBuilder();
+        for (String line : body) {
+            if (!current.isEmpty() && current.length() + line.length() + 1 > budget) {
+                parts.add(prefix + current + suffix);
+                current = new StringBuilder();
+            }
+            if (!current.isEmpty()) {
+                current.append("\n");
+            }
+            current.append(line);
+        }
+        if (!current.isEmpty()) {
+            parts.add(prefix + current + suffix);
+        }
         return parts;
     }
 

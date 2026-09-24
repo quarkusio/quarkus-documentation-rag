@@ -1,0 +1,36 @@
+= Body Attributes Guide
+
+include::_attributes.adoc[]
+
+BODY_PREAMBLE_MARKER covers Quarkus {quarkus-version}.
+
+== Dependency
+
+:provider-artifact: quarkus-foo
+include::_dependency.adoc[]
+
+== Redefined
+
+:provider-artifact: quarkus-bar
+
+Uses {provider-artifact} with{nbsp}spaces{empty}.
+
+== Config Reference
+
+[.configuration-reference, cols="80,.^10,.^10"]
+|===
+h|[.header-title]##Configuration property##
+h|Type
+h|Default
+
+a|icon:lock[title=Fixed at build time] [[quarkus-foo_quarkus-foo-enabled]] [.property-path]##link:#quarkus-foo_quarkus-foo-enabled[`+++quarkus.foo.enabled+++`]##
+
+[.description]
+--
+Whether foo is enabled.
+
+Environment variable: `+++QUARKUS_FOO_ENABLED+++`
+--
+|boolean
+|`true`
+|===
